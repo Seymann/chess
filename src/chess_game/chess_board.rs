@@ -3,7 +3,7 @@ use std::fmt;
 use super::ChessMoveError;
 
 struct Positions {
-    val: [[char; 8]; 8]
+    val:  [[char; 8]; 8]
 }
  
 impl Positions {
@@ -28,6 +28,14 @@ impl Positions {
     fn at(&self, a: usize, b: usize) -> char {
         self.val[a][b]
     }
+    fn insert(&mut self, val: char, coordinates: [usize; 2]) -> Result<(), ChessMoveError> {
+        if coordinates[0] > 7 || coordinates[1] > 7 {
+            return Err(ChessMoveError::InvalidCoordinates);
+        }
+        self.val[coordinates[0]][coordinates[1]] = val;
+        Ok(())
+    }
+
 }
 
 pub struct Board {
@@ -42,39 +50,20 @@ impl Board {
             white_turn: true
         }
     }
-    pub fn is_at(&self, first: char, second: char) -> Result<char, ChessMoveError> {
-        let mut x = 8;
-        match first {
-            'a' => x = 0,
-            'b' => x = 1,
-            'c' => x = 2,
-            'd' => x = 3,
-            'e' => x = 4,
-            'f' => x = 5,
-            'g' => x = 6,
-            'h' => x = 7,
-            _ => {}
-        }
-        if x == 8 {
-            return Err(ChessMoveError::InvalidCharUsed(String::from("first letter was not between a-h")));
-        }
-        let mut y = 9;
-        match second.to_digit(10) {
-            Some(num) => {
-                match num.try_into() {
-                    Ok(num) => y = num,
-                    Err(_e) => return Err(ChessMoveError::InvalidCharUsed(String::from("Second number was not a Digit")))
-                }
-            },
-            None => return Err(ChessMoveError::InvalidCharUsed(String::from("Second number was not a Digit")))
-        }
-        y = 8 - y;
-        println!("x: {}, y {}", x, y);
-        if y >= 8 {
-            return Err(ChessMoveError::InvalidCharUsed(String::from("Number not between 1-8")))
-        }
-        println!("x: {}, y {}", x, y);
-        return Ok(self.positions.at(y,x));
+    pub fn is_at(&self, a: usize, b: usize) -> char {
+        return self.positions.at(a,b);
+    }
+
+    pub fn play_move(&mut self, move1: &String, move2: &String) -> Result<(), ChessMoveError> {
+        let co1 = super::Game::move_to_coordinates(&move1)?;
+        let co2 = super::Game::move_to_coordinates(&move2)?;
+        let piece = self.is_at(co1[0], co1[1]);
+
+        self.positions.insert(' ', co1);
+        self.positions.insert(piece, co2);
+
+        Ok(())
+
     }
 }
 
