@@ -21,13 +21,17 @@ impl Game {
 
         let mut move1: String;
         let mut move2: String;
-        let mut move1_val: bool = false;
-        let mut move2_val: bool = false;
         loop {
             println!("{}", game.board);
             println!("Please enter your move!\nIn the Format \"e4 c6\"");
             scan!("{} {}", move1, move2);
-            game.validate_move(&move1, &move2);
+            move1.retain(|c| !c.is_whitespace());
+            move2.retain(|c| !c.is_whitespace());
+            println!("{} {}", move1, move2);
+            match game.validate_move(&move1, &move2) {
+                Err(e) => println!("{:?}", e ),
+                Ok(()) => println!("Input good!")
+            };
         }
 
     }

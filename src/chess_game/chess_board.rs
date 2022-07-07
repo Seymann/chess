@@ -63,15 +63,17 @@ impl Board {
             Some(num) => {
                 match num.try_into() {
                     Ok(num) => y = num,
-                    Err(e) => return Err(ChessMoveError::InvalidCharUsed(String::from("Second number was not a Digit")))
+                    Err(_e) => return Err(ChessMoveError::InvalidCharUsed(String::from("Second number was not a Digit")))
                 }
             },
             None => return Err(ChessMoveError::InvalidCharUsed(String::from("Second number was not a Digit")))
         }
-        if y > 8 || y < 1 {
+        y = 8 - y;
+        println!("x: {}, y {}", x, y);
+        if y >= 8 {
             return Err(ChessMoveError::InvalidCharUsed(String::from("Number not between 1-8")))
         }
-
+        println!("x: {}, y {}", x, y);
         return Ok(self.positions.at(y,x));
     }
 }
