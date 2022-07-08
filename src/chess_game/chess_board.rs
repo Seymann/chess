@@ -1,5 +1,6 @@
 use std::fmt;
 
+use super::game_logic;
 use super::ChessMoveError;
 
 struct Positions {
@@ -55,21 +56,26 @@ impl Board {
     }
 
     pub fn play_move(&mut self, move1: &String, move2: &String) -> Result<(), ChessMoveError> {
-        let co1 = super::Game::move_to_coordinates(&move1)?;
-        let co2 = super::Game::move_to_coordinates(&move2)?;
+        let co1 = game_logic::move_to_coordinates(&move1)?;
+        let co2 = game_logic::move_to_coordinates(&move2)?;
         let piece = self.is_at(co1[0], co1[1]);
 
-        self.positions.insert(' ', co1);
-        self.positions.insert(piece, co2);
+        self.positions.insert(' ', co1)?;
+        self.positions.insert(piece, co2)?;
+        self.white_turn = !self.white_turn;
 
         Ok(())
 
+    }
+
+    pub fn is_white_turn(&self) -> bool {
+        self.white_turn
     }
 }
 
 impl fmt::Display for Board {
     fn fmt(&self, f:&mut fmt::Formatter) -> fmt::Result {
-        let mut turn: &str;
+        let turn: &str;
         if self.white_turn {
             turn = "white";
         } else {
