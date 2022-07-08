@@ -1,5 +1,6 @@
 use super::ChessMoveError;
 use super::Game;
+use super::chess_board::Coordinates;
 
 pub fn validate_input(move1: &String) -> Result<(), ChessMoveError> {
     for (i, c) in move1.char_indices() {
@@ -26,7 +27,7 @@ pub fn validate_input(move1: &String) -> Result<(), ChessMoveError> {
     return Ok(());
 }
 
-pub fn move_to_coordinates(move1: &String) -> Result<[usize; 2], ChessMoveError> {
+pub fn move_to_coordinates(move1: &String) -> Result<Coordinates, ChessMoveError> {
     let vec: Vec<char> = move1.chars().collect();
     if vec.len() != 2 {
         return Err(ChessMoveError::MoveTooLong(String::from("Move not 2 letters long.")));
@@ -62,7 +63,8 @@ pub fn move_to_coordinates(move1: &String) -> Result<[usize; 2], ChessMoveError>
     if y >= 8 {
         return Err(ChessMoveError::InvalidCharUsed(String::from("Number not between 1-8")))
     }
-    Ok([y,x])
+    let res: Coordinates = Coordinates { horzontal: x, vertical: y };
+    Ok(res)
 }
 
 pub fn validate_move(game: &Game, move1: &String, move2: &String) -> Result<(), ChessMoveError> {
@@ -72,24 +74,40 @@ pub fn validate_move(game: &Game, move1: &String, move2: &String) -> Result<(), 
     let coordinates1 = move_to_coordinates(&move1)?; 
     let coordinates2 = move_to_coordinates(&move2)?;
 
-    let start_piece = game.board.is_at(coordinates1[0], coordinates1[1]);
-    let end_point = game.board.is_at(coordinates2[0], coordinates2[1]);
+    let start_piece = game.board.is_at(&coordinates1);
+    let end_point = game.board.is_at(&coordinates2);
 
     // check if move is correct
 
     // is correct piece being moved?
-    if game.board.is_white_turn() && start_piece.is_lowercase() {
-        return Err(ChessMoveError::WrongTurn(String::from("It is Whites turn, yet Black is being moved")))
-    }
-    if !game.board.is_white_turn() && start_piece.is_uppercase() {
-        return Err(ChessMoveError::WrongTurn(String::from("It is Blacks turn, yet White is being moved")))
-    }
-    if start_piece == ' ' {
-        return Err(ChessMoveError::InvalidStartPiece)
-    }
-    if (start_piece.is_uppercase() && end_point.is_uppercase()) || (start_piece.is_lowercase() && end_point.is_lowercase()) {
-        return Err(ChessMoveError::TakingOwnPiece)
+    if let Err(e) = can_piece_move(game, start_piece, end_point, coordinates1, coordinates2) {
+        return Err(e) 
     }
 
     Ok(())
+}
+
+pub fn can_piece_move(game: &Game, piece: char, end_point: char, from: Coordinates, to: Coordinates) -> Result<(), ChessMoveError>{
+    if game.board.is_white_turn() && piece.is_lowercase() {
+        return Err(ChessMoveError::WrongTurn(String::from("It is Whites turn, yet Black is being moved")))
+    }
+    if !game.board.is_white_turn() && piece.is_uppercase() {
+        return Err(ChessMoveError::WrongTurn(String::from("It is Blacks turn, yet White is being moved")))
+    }
+    if piece == ' ' {
+        return Err(ChessMoveError::InvalidStartPiece)
+    }
+    if (piece.is_uppercase() && end_point.is_uppercase()) || (piece.is_lowercase() && end_point.is_lowercase()) {
+        return Err(ChessMoveError::TakingOwnPiece)
+    }
+
+    // is the move allowed?
+    match piece.to_ascii_lowercase() {
+        'p' => {
+        }
+        _ => {}
+    }
+
+    Ok(())
+
 }

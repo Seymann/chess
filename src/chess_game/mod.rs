@@ -11,7 +11,8 @@ pub enum ChessMoveError {
     InvalidCoordinates,
     WrongTurn(String),
     InvalidStartPiece,
-    TakingOwnPiece
+    TakingOwnPiece,
+    MoveNotAllowed(String)
 }
 
 pub struct Game {

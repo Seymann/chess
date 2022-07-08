@@ -3,6 +3,12 @@ use std::fmt;
 use super::game_logic;
 use super::ChessMoveError;
 
+pub struct Coordinates {
+    pub horzontal: usize,
+    pub vertical: usize
+}
+
+
 struct Positions {
     val:  [[char; 8]; 8]
 }
@@ -26,14 +32,14 @@ impl Positions {
             val :board
         }
     }
-    fn at(&self, a: usize, b: usize) -> char {
-        self.val[a][b]
+    fn at(&self, co: &Coordinates) -> char {
+        self.val[co.vertical][co.horzontal]
     }
-    fn insert(&mut self, val: char, coordinates: [usize; 2]) -> Result<(), ChessMoveError> {
-        if coordinates[0] > 7 || coordinates[1] > 7 {
+    fn insert(&mut self, val: char, coordinates: &Coordinates) -> Result<(), ChessMoveError> {
+        if coordinates.horzontal > 7 || coordinates.horzontal > 7 {
             return Err(ChessMoveError::InvalidCoordinates);
         }
-        self.val[coordinates[0]][coordinates[1]] = val;
+        self.val[coordinates.vertical][coordinates.horzontal] = val;
         Ok(())
     }
 
@@ -51,17 +57,18 @@ impl Board {
             white_turn: true
         }
     }
-    pub fn is_at(&self, a: usize, b: usize) -> char {
-        return self.positions.at(a,b);
+    pub fn is_at(&self, co: &Coordinates) -> char {
+
+        return self.positions.at(co);
     }
 
     pub fn play_move(&mut self, move1: &String, move2: &String) -> Result<(), ChessMoveError> {
         let co1 = game_logic::move_to_coordinates(&move1)?;
         let co2 = game_logic::move_to_coordinates(&move2)?;
-        let piece = self.is_at(co1[0], co1[1]);
+        let piece = self.is_at(&co1);
 
-        self.positions.insert(' ', co1)?;
-        self.positions.insert(piece, co2)?;
+        self.positions.insert(' ', &co1)?;
+        self.positions.insert(piece, &co2)?;
         self.white_turn = !self.white_turn;
 
         Ok(())
